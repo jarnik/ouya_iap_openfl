@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<project>
+	
+	<meta title="ouya_iap" package="com.jarnik.iaptest" version="1.0.0" company="Company Name" />
+	<app main="Main" path="bin" file="ouya_iap" />
+	<window background="0x000000" width="0" height="0" fps="30" orientation="landscape" fullscreen="true" />
+	
+	<source path="src" /> 
+	
+	<template path="OUYA_IAP.java" rename="src/com/jarnik/iaptest/OUYA_IAP.java" if="android" />
+	<java path="src/java" />
+	
+	<haxelib name="openfl" />
+	<haxelib name="openfl-ouya" />
+	
+	<assets path="assets" exclude="nme.svg" />
+	<icon path="assets/nme.svg" />
+	<certificate path="bin/jarnik.keystore" password="N4_51ca!" />
+	
+</project>

@@ -7,6 +7,7 @@ import openfl.Assets;
 import openfl.utils.JNI;
 import tv.ouya.console.api.OuyaController;
 import tv.ouya.console.api.OuyaFacade;
+import openfl.events.JoystickEvent;
 #end
 
 class Main extends Sprite {
@@ -14,7 +15,9 @@ class Main extends Sprite {
 	public static inline var OUYA_DEVELOPER_ID:String = "a589aa6a-cf50-4f72-9313-0a515e4dab95";
 	#if android
 	public static var ouyaFacade:OuyaFacade;
-	#end	
+	#end
+	
+	private var p:Purchases;
 	
 	public function new () {
 		
@@ -32,20 +35,31 @@ class Main extends Sprite {
 		
 		// How do you call Haxe from Java (Android) http://www.openfl.org/forums/general-discussion/how-do-you-call-haxe-java-android/
 		
-		var p:Purchases = new Purchases( ouyaFacade.__jobject );
+		p = new Purchases( ouyaFacade.__jobject );
 		
 		p.requestProductList(["aaa", "bbb"]);
+		
+		stage.addEventListener (JoystickEvent.BUTTON_DOWN, stage_onJoystickButtonDown);
 		
 		#end
 		
 	}
+	
+	#if android
+	private function stage_onJoystickButtonDown( e:JoystickEvent ):Void {
+		trace("pressed button, will purchase");
+		p.requestPurchase( "test_sss_full" );
+	}
+	#end
 	
 }
 
 class Purchases
 {	
 	
-	public var IAP_requestListObject:Dynamic;
+	public var initCall:Dynamic;
+	public var requestProductListCall:Dynamic;
+	public var requestPurchaseCall:Dynamic;
 	public var ouyaFacadeObject:Dynamic;
 	
 	public function new( ouyaFacadeObject:Dynamic )
@@ -57,16 +71,26 @@ class Purchases
 		
 		// writing JNI bindings http://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html#zz-4.3
 		trace("=================== JNI linking");
-		IAP_requestListObject = openfl.utils.JNI.createStaticMethod
-			("com.jarnik.iaptest.OUYA_IAP", "requestProductList", "([Ljava/lang/String;Ltv/ouya/console/api/OuyaFacade;)V", true);
+		initCall = openfl.utils.JNI.createStaticMethod
+			("com.jarnik.iaptest.OUYA_IAP", "init", "(Ltv/ouya/console/api/OuyaFacade;)V", true);
+		requestProductListCall = openfl.utils.JNI.createStaticMethod
+			("com.jarnik.iaptest.OUYA_IAP", "requestProductList", "([Ljava/lang/String;)V", true);
+		requestPurchaseCall = openfl.utils.JNI.createStaticMethod
+			("com.jarnik.iaptest.OUYA_IAP", "requestPurchase", "(Ljava/lang/String;)V", true);
 		trace("=================== JNI linked!");
-		//fn([this]);
+		initCall([ouyaFacadeObject]);
+				
 		#end
 	}
 	
 	public function requestProductList( products:Array<String> ):Void {
 		trace("requesting " + products.join(" "));
-		IAP_requestListObject( [products, ouyaFacadeObject] );
+		requestProductListCall( [products] );
+	}
+	
+	public function requestPurchase( product:String ):Void {
+		trace("purchasing " + product );
+		requestPurchaseCall( [product] );
 	}
 
 	public function onPurchase(productID:String)

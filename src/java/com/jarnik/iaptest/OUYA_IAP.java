@@ -51,171 +51,6 @@ public class OUYA_IAP
 		//callback.call("onPurchase", new Object[] {"junk"});
 	}*/
 	
-    private static final byte[] APPLICATION_KEY = {
-            (byte) 0x30, 
-(byte) 0x81, 
-(byte) 0x9f, 
-(byte) 0x30, 
-(byte) 0x0d, 
-(byte) 0x06, 
-(byte) 0x09, 
-(byte) 0x2a, 
-(byte) 0x86, 
-(byte) 0x48, 
-(byte) 0x86, 
-(byte) 0xf7, 
-(byte) 0x0d, 
-(byte) 0x01, 
-(byte) 0x01, 
-(byte) 0x01, 
-(byte) 0x05, 
-(byte) 0x00, 
-(byte) 0x03, 
-(byte) 0x81, 
-(byte) 0x8d, 
-(byte) 0x00, 
-(byte) 0x30, 
-(byte) 0x81, 
-(byte) 0x89, 
-(byte) 0x02, 
-(byte) 0x81, 
-(byte) 0x81, 
-(byte) 0x00, 
-(byte) 0xc9, 
-(byte) 0x8a, 
-(byte) 0xb4, 
-(byte) 0x84, 
-(byte) 0x78, 
-(byte) 0xa3, 
-(byte) 0x89, 
-(byte) 0xea, 
-(byte) 0x5b, 
-(byte) 0x49, 
-(byte) 0xed, 
-(byte) 0x69, 
-(byte) 0x42, 
-(byte) 0xa1, 
-(byte) 0x11, 
-(byte) 0xe3, 
-(byte) 0x9d, 
-(byte) 0x8e, 
-(byte) 0x21, 
-(byte) 0xb0, 
-(byte) 0xfb, 
-(byte) 0x9a, 
-(byte) 0x06, 
-(byte) 0x61, 
-(byte) 0x35, 
-(byte) 0xdd, 
-(byte) 0x66, 
-(byte) 0xd4, 
-(byte) 0x31, 
-(byte) 0x5e, 
-(byte) 0x62, 
-(byte) 0xa3, 
-(byte) 0x13, 
-(byte) 0xb7, 
-(byte) 0x7f, 
-(byte) 0x26, 
-(byte) 0x58, 
-(byte) 0xff, 
-(byte) 0x3b, 
-(byte) 0xe5, 
-(byte) 0x04, 
-(byte) 0x0e, 
-(byte) 0xab, 
-(byte) 0xbc, 
-(byte) 0x4f, 
-(byte) 0x48, 
-(byte) 0xeb, 
-(byte) 0x57, 
-(byte) 0xae, 
-(byte) 0xaa, 
-(byte) 0xe2, 
-(byte) 0x43, 
-(byte) 0x64, 
-(byte) 0x2d, 
-(byte) 0xc1, 
-(byte) 0x44, 
-(byte) 0x36, 
-(byte) 0xe1, 
-(byte) 0xdc, 
-(byte) 0xae, 
-(byte) 0xf1, 
-(byte) 0x1e, 
-(byte) 0x90, 
-(byte) 0x8c, 
-(byte) 0x11, 
-(byte) 0xa6, 
-(byte) 0x17, 
-(byte) 0x66, 
-(byte) 0x02, 
-(byte) 0xa2, 
-(byte) 0x50, 
-(byte) 0xd5, 
-(byte) 0x9c, 
-(byte) 0x78, 
-(byte) 0xc9, 
-(byte) 0x07, 
-(byte) 0x30, 
-(byte) 0x09, 
-(byte) 0xef, 
-(byte) 0x15, 
-(byte) 0x63, 
-(byte) 0x5f, 
-(byte) 0x61, 
-(byte) 0x89, 
-(byte) 0xef, 
-(byte) 0x38, 
-(byte) 0xd3, 
-(byte) 0x43, 
-(byte) 0x0f, 
-(byte) 0x6c, 
-(byte) 0x96, 
-(byte) 0x32, 
-(byte) 0x35, 
-(byte) 0xd5, 
-(byte) 0xdc, 
-(byte) 0x5e, 
-(byte) 0x71, 
-(byte) 0xfd, 
-(byte) 0xd1, 
-(byte) 0xa6, 
-(byte) 0x43, 
-(byte) 0x13, 
-(byte) 0x2e, 
-(byte) 0xa1, 
-(byte) 0x03, 
-(byte) 0x11, 
-(byte) 0x52, 
-(byte) 0x82, 
-(byte) 0x50, 
-(byte) 0x63, 
-(byte) 0xc6, 
-(byte) 0x00, 
-(byte) 0x81, 
-(byte) 0xbd, 
-(byte) 0x38, 
-(byte) 0x0c, 
-(byte) 0xc0, 
-(byte) 0x7d, 
-(byte) 0xb1, 
-(byte) 0x9e, 
-(byte) 0x64, 
-(byte) 0xab, 
-(byte) 0x8c, 
-(byte) 0xa0, 
-(byte) 0x50, 
-(byte) 0xc6, 
-(byte) 0x3e, 
-(byte) 0x5b, 
-(byte) 0x02, 
-(byte) 0x03, 
-(byte) 0x01, 
-(byte) 0x00, 
-(byte) 0x01, 
-    };
-	
 	/**
      * The outstanding purchase request UUIDs.
      */
@@ -223,13 +58,15 @@ public class OUYA_IAP
     private static final Map<String, Product> mOutstandingPurchaseRequests = new HashMap<String, Product>();
 	
 	public static List<Purchasable> PRODUCT_IDENTIFIER_LIST;
+	public static HaxeObject mCallback;
 	private static List<Product> mProductList; 
 	private static OuyaFacade mOuyaFacade;
 	private static PublicKey mPublicKey;
 	
-	public static void init(OuyaFacade ouyaFacade)
+	public static void init(final HaxeObject callback, OuyaFacade ouyaFacade, byte[] APPLICATION_KEY )
 	{
 		mOuyaFacade = ouyaFacade;
+		mCallback = callback;
 		
         // Create a PublicKey object from the key data downloaded from the developer portal.
         try {
@@ -244,6 +81,8 @@ public class OUYA_IAP
 	public static void requestProductList(String[] products)
 	{
 		Log.d("IAP", " will request "+products[0]+" etc " );
+		
+		// TODO parse products, create purchasables
 		PRODUCT_IDENTIFIER_LIST = Arrays.asList(
 			new Purchasable("test_sss_full")
 			//new Purchasable("__DECLINED__THIS_PURCHASE")
@@ -257,6 +96,7 @@ public class OUYA_IAP
                 mProductList = products;
                 //addProducts();
 				Log.d("IAP", "========== SUCCESS " );
+				callback.call("onPurchase", new Object[] {"junk"});
             }
 
             @Override
@@ -324,7 +164,6 @@ public class OUYA_IAP
 		Log.w("IAP", "HEYYA ouyaFacade.requestPurchase");
         mOuyaFacade.requestPurchase(purchasable, new PurchaseListener(product));
 	}
-	
 	
     /**
      * The callback for when the user attempts to purchase something. We're not worried about
@@ -410,6 +249,7 @@ public class OUYA_IAP
                 return;
             }
 
+			//TODO request recipes
             //requestReceipts();
 
         }

@@ -70,15 +70,16 @@ class Purchases
 		//fn([this]);
 		
 		// writing JNI bindings http://www3.ntu.edu.sg/home/ehchua/programming/java/JavaNativeInterface.html#zz-4.3
+		// JNI elements https://nekonme.googlecode.com/svn/trunk/project/android/JNI.cpp
 		trace("=================== JNI linking");
 		initCall = openfl.utils.JNI.createStaticMethod
-			("com.jarnik.iaptest.OUYA_IAP", "init", "(Ltv/ouya/console/api/OuyaFacade;)V", true);
+			("com.jarnik.iaptest.OUYA_IAP", "init", "(Lorg/haxe/nme/HaxeObject;Ltv/ouya/console/api/OuyaFacade;B;)V", true);
 		requestProductListCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestProductList", "([Ljava/lang/String;)V", true);
 		requestPurchaseCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestPurchase", "(Ljava/lang/String;)V", true);
 		trace("=================== JNI linked!");
-		initCall([ouyaFacadeObject]);
+		initCall([this, ouyaFacadeObject, Assets.getBytes("assets/key.der")]);
 				
 		#end
 	}

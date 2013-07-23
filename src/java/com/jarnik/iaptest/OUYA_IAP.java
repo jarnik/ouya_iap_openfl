@@ -68,6 +68,9 @@ public class OUYA_IAP
 		mOuyaFacade = ouyaFacade;
 		mCallback = callback;
 		
+		Log.d("IAP", "Java here, running init!");
+		Log.d("IAP", "received APP KEY bytes "+APPLICATION_KEY[0]+" "+APPLICATION_KEY[1]);
+		
         // Create a PublicKey object from the key data downloaded from the developer portal.
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(APPLICATION_KEY);
@@ -96,7 +99,7 @@ public class OUYA_IAP
                 mProductList = products;
                 //addProducts();
 				Log.d("IAP", "========== SUCCESS " );
-				callback.call("onPurchase", new Object[] {"junk"});
+				//callback.call("onPurchase", new Object[] {"junk"});
             }
 
             @Override

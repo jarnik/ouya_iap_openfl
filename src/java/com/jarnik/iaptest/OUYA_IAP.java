@@ -89,21 +89,22 @@ public class OUYA_IAP
 	{
 		Log.d("IAP", " will request "+products[0]+" etc " );
 		
-		// TODO parse products, create purchasables
-		PRODUCT_IDENTIFIER_LIST = Arrays.asList(
-			new Purchasable("test_sss_full")
-			//new Purchasable("__DECLINED__THIS_PURCHASE")
-		); 
+		PRODUCT_IDENTIFIER_LIST = new ArrayList<Purchasable>();
+		for ( String s : products )
+			PRODUCT_IDENTIFIER_LIST.add( new Purchasable( s ) );
 		
-		Log.d("IAP", "========== created product list" );
+		Log.d("IAP", "========== created product list of "+PRODUCT_IDENTIFIER_LIST.size() );
 		
 		mOuyaFacade.requestProductList(PRODUCT_IDENTIFIER_LIST, new CancelIgnoringOuyaResponseListener<ArrayList<Product>>() {
             @Override
             public void onSuccess(final ArrayList<Product> products) {
                 mProductList = products;
-                //addProducts();
-				Log.d("IAP", "========== SUCCESS " );
+				for(Product p : products) {
+                    Log.d("IAP", p.getName() + " costs " + p.getPriceInCents());
+                }
+				Log.d("IAP", "========== requestProductList SUCCESS "+products.size() );
 				//callback.call("onPurchase", new Object[] {"junk"});
+				mCallback.call("onProductListReceived", new Object[] { products } );
             }
 
             @Override
@@ -112,7 +113,8 @@ public class OUYA_IAP
                 // here to tell you that your app needs to handle this case: if your app doesn't display
                 // something, the user won't know of the failure.
                 //Toast.makeText(IapSampleActivity.this, "Could not fetch product information (error " + errorCode + ": " + errorMessage + ")", Toast.LENGTH_LONG).show();
-				Log.d("IAP", "========== FAIL " );
+				Log.d("IAP", "========== requestProductList FAIL " );
+				mCallback.call("onProductListFailed",  new Object[] { errorCode + ": " + errorMessage } );
             }
         }); 
 		
@@ -123,9 +125,18 @@ public class OUYA_IAP
 	public static void requestPurchase( String productName ) 
 		throws GeneralSecurityException, UnsupportedEncodingException, JSONException {
 		
-		Product product = mProductList.get( 0 );
+		Product product = null;
+		for ( Product p: mProductList )
+			if ( p.getIdentifier() == productName ) {
+				product = p;
+				break;
+			}
+		if ( product == null ) {
+			Log.w("IAP", "Requested product ID "+productName+" not found in requested products!" );
+            return;
+		}
 		
-		Log.d("IAP", "========== requesting purchase " );
+		Log.d("IAP", "========== requesting purchase of "+product.getName() );
 			
         SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
 
@@ -138,7 +149,6 @@ public class OUYA_IAP
         JSONObject purchaseRequest = new JSONObject();
         purchaseRequest.put("uuid", uniqueId);
         purchaseRequest.put("identifier", product.getIdentifier());
-        //purchaseRequest.put("testing", "true"); // This value is only needed for testing, not setting it results in a live purchase
         String purchaseRequestJson = purchaseRequest.toString();
 		Log.w("IAP", "HEYYA requesting "+product.getIdentifier()+" uuid "+uniqueId);
 
@@ -258,12 +268,12 @@ public class OUYA_IAP
 
 			//TODO request recipes
             //requestReceipts();
-
         }
 
         @Override
         public void onFailure(int errorCode, String errorMessage, Bundle optionalData) {
-			Log.w("IAP", "HEYYA PurchaseListener.onFailure");
+			Log.w("IAP", "onPurchaseFailed "+errorCode+": "+errorMessage);
+			mCallback.call("onPurchaseFailed", new Object[] { errorCode+": "+errorMessage } );
         }
 
         /*
@@ -272,6 +282,7 @@ public class OUYA_IAP
         @Override
         public void onCancel() {
 			Log.w("IAP", "HEYYA PurchaseListener.onCancel");
+			mCallback.call("onPurchaseCancelled", new Object[] {} );
             //showError("User cancelled purchase");
         }
     }

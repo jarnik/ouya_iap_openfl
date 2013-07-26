@@ -40,7 +40,7 @@ class Main extends Sprite {
 		
 		p = new Purchases( ouyaFacade.__jobject );
 		
-		p.requestProductList(["aaa", "bbb"]);
+		p.requestProductList(["test_sss_full", "__DECLINED__THIS_PURCHASE"]);
 		
 		stage.addEventListener (JoystickEvent.BUTTON_DOWN, stage_onJoystickButtonDown);
 		
@@ -85,9 +85,7 @@ class Purchases
 		trace("=================== JNI linked!");
 		var appKey:ByteArray =  Assets.getBytes("assets/key.der");
 		
-		trace("first APP KEY bytes " + appKey.readUnsignedByte() + " " + appKey.readUnsignedByte());
-		appKey.position = 0;
-		//use base64
+		// I don't know how to pass ByteArray to JNI, let's use Base64
 		var BASE64:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; 
 		var base64:BaseCode = new BaseCode( Bytes.ofString( BASE64 ) );
 		var appKey64:String = base64.encodeBytes( appKey ).toString();
@@ -95,7 +93,6 @@ class Purchases
 		var params:Array<Dynamic> = [this, ouyaFacadeObject, appKey64 ];
 		trace("gonna run initCall from Haxe");
 		initCall( params );
-				
 		#end
 	}
 	
@@ -108,10 +105,29 @@ class Purchases
 		trace("purchasing " + product );
 		requestPurchaseCall( [product] );
 	}
+	
+	// ==================================== CALLBACKS ======================= 
 
-	public function onPurchase(productID:String)
+	public function onProductListReceived(products:Dynamic)
 	{
-		trace("HEYAAAAAAAA callback! "+productID);
+		trace("=== onProductListReceived! "+products);
+	}
+	public function onProductListFailed(error:String)
+	{
+		trace("=== onProductListFailed! "+error);
+	}
+	
+	public function onPurchaseSuccess(productID:String)
+	{
+		trace("=== callback! "+productID);
+	}
+	public function onPurchaseFailed(error:String)
+	{
+		trace("=== onPurchaseFailed! "+error);
+	}
+	public function onPurchaseCancelled()
+	{
+		trace("=== onPurchaseCancelled! ");
 	}
 }
 

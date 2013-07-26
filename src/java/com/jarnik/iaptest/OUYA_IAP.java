@@ -63,12 +63,16 @@ public class OUYA_IAP
 	private static OuyaFacade mOuyaFacade;
 	private static PublicKey mPublicKey;
 	
-	public static void init(final HaxeObject callback, OuyaFacade ouyaFacade, byte[] APPLICATION_KEY )
+	public static void init(final HaxeObject callback, OuyaFacade ouyaFacade, String APPLICATION_KEY_64 )
 	{
 		mOuyaFacade = ouyaFacade;
 		mCallback = callback;
 		
 		Log.d("IAP", "Java here, running init!");
+		
+		Log.d("IAP", "got APPLICATION_KEY_64 "+APPLICATION_KEY_64);
+		
+		byte[] APPLICATION_KEY = Base64.decode( APPLICATION_KEY_64, Base64.NO_WRAP );
 		Log.d("IAP", "received APP KEY bytes "+APPLICATION_KEY[0]+" "+APPLICATION_KEY[1]);
 		
         // Create a PublicKey object from the key data downloaded from the developer portal.

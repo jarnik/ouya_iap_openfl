@@ -2,6 +2,7 @@ import flash.display.Bitmap;
 import flash.display.Sprite;
 import flash.utils.ByteArray;
 import haxe.io.Bytes;
+import haxe.crypto.BaseCode;
 
 import openfl.Assets;
 
@@ -75,7 +76,7 @@ class Purchases
 		// JNI elements https://nekonme.googlecode.com/svn/trunk/project/android/JNI.cpp
 		trace("=================== JNI linking");
 		initCall = openfl.utils.JNI.createStaticMethod
-			("com.jarnik.iaptest.OUYA_IAP", "init", "(Lorg/haxe/nme/HaxeObject;Ltv/ouya/console/api/OuyaFacade;[B)V", true);
+			("com.jarnik.iaptest.OUYA_IAP", "init", "(Lorg/haxe/nme/HaxeObject;Ltv/ouya/console/api/OuyaFacade;Ljava/lang/String;)V", true);
 			//										   (Lorg/haxe/nme/HaxeObject;Ltv/ouya/console/api/OuyaFacade;[B)V
 		requestProductListCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestProductList", "([Ljava/lang/String;)V", true);
@@ -83,12 +84,17 @@ class Purchases
 			("com.jarnik.iaptest.OUYA_IAP", "requestPurchase", "(Ljava/lang/String;)V", true);
 		trace("=================== JNI linked!");
 		var appKey:ByteArray =  Assets.getBytes("assets/key.der");
+		
 		trace("first APP KEY bytes " + appKey.readUnsignedByte() + " " + appKey.readUnsignedByte());
 		appKey.position = 0;
-		use base64
-		var params:Array<Dynamic> = [this, ouyaFacadeObject, appKey ];
+		//use base64
+		var BASE64:String = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"; 
+		var base64:BaseCode = new BaseCode( Bytes.ofString( BASE64 ) );
+		var appKey64:String = base64.encodeBytes( appKey ).toString();
+		
+		var params:Array<Dynamic> = [this, ouyaFacadeObject, appKey64 ];
 		trace("gonna run initCall from Haxe");
-		//initCall( params );
+		initCall( params );
 				
 		#end
 	}

@@ -109,7 +109,11 @@ public class OUYA_IAP
                 }
 				Log.d("IAP", "========== requestProductList SUCCESS "+products.size() );
 				//callback.call("onPurchase", new Object[] {"junk"});
-				mCallback.call("onProductListReceived", new Object[] { products } );
+				String product_ids = "";
+				//for ( int i = 0; i < mProductList.size(); i++ )
+					//product_ids += mProductList.get( i ).getIdentifier()+" ";
+				product_ids = "kocka leze dirou";
+				mCallback.call("onProductListReceived", new Object[] { product_ids } );
             }
 
             @Override
@@ -362,7 +366,10 @@ public class OUYA_IAP
             });
 
             mReceiptList = receipts;
-			mCallback.call("onReceiptsReceived", new Object[] { receipts } );
+			String[] receipt_ids = new String[ mReceiptList.size() ];
+			for ( int i = 0; i < mReceiptList.size(); i++ )
+				receipt_ids[ i ] = mReceiptList.get( i ).getIdentifier();
+			mCallback.call("onReceiptsReceived", new Object[] { receipt_ids } );
         }
 
         /**

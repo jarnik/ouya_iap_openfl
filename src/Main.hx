@@ -116,10 +116,11 @@ class IAP_Handler
 	
 	// ==================================== CALLBACKS ======================= 
 
-	public function onProductListReceived(products:Dynamic)
+	public function onProductListReceived(products:String)
 	{
-		trace("=== onProductListReceived! "+products);
-		trace("=== onProductListReceived! ln "+products.length);
+		//trace("=== onProductListReceived! "+products.join(" "));
+		var p:Array<String> = products.split(" ");
+		trace("=== onProductListReceived! "+products+" >> "+p.join("x"));
 	}
 	public function onProductListFailed(error:String)
 	{
@@ -139,9 +140,9 @@ class IAP_Handler
 		trace("=== onPurchaseCancelled! ");
 	}
 	
-	public function onReceiptsReceived(receipts:Dynamic)
+	public function onReceiptsReceived(receipts:Array<String>)
 	{
-		trace("=== onReceiptsReceived! "+receipts);
+		trace("=== onReceiptsReceived! "+receipts.join(" "));
 	}
 	public function onReceiptsFailed( error:String )
 	{

@@ -32,8 +32,9 @@ You will need:
  
 Enter the above mentioned into the Main.hx.
 
-IAPHandler class defines multiple callback methods (onProductListReceived, onPurchaseSuccess, etc.).
+IAPHandler.hx class defines multiple callback methods (onProductListReceived, onPurchaseSuccess, etc.).
 Subclass it and override the methods with your own handlers.
+One such example subclass is a MyIAPHandler.hx.
 
 The JNI bindings are contained within a src\java\com\jarnik\iaptest\OUYA_IAP.java class. 
 It's mostly a copy-pasted "iap-sample-app" from the ODK.
@@ -41,4 +42,4 @@ It's mostly a copy-pasted "iap-sample-app" from the ODK.
 Contributing:
 =======
 
-My Java and JNI knowledge is fairly limited, so please don't hesitate to contribute with a better methods.
+My Java and JNI knowledge is fairly limited, so please don't hesitate to contribute with better methods.

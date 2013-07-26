@@ -15,7 +15,7 @@
 	
 	<assets path="assets" exclude="nme.svg" />
 	<assets path="assets" include="*.der" type="binary" />
+	
 	<icon path="assets/nme.svg" />
-	<certificate path="bin/jarnik.keystore" password="N4_51ca!" />
 	
 </project>

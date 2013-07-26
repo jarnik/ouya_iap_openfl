@@ -43,6 +43,7 @@ public class OUYA_IAP
 	public static List<Purchasable> PRODUCT_IDENTIFIER_LIST;
 	private static List<Product> mProductList; 
 	private static List<Receipt> mReceiptList;
+	private static String mLastPurchasedProductID;
 	
 	public static HaxeObject mCallback;
 	private static OuyaFacade mOuyaFacade;
@@ -160,6 +161,10 @@ public class OUYA_IAP
         mOuyaFacade.requestPurchase(purchasable, new PurchaseListener(product));
 	}
 	
+	public static String getLastPurchasedProductID() {
+		return mLastPurchasedProductID;
+	}
+	
     /**
      * The callback for when the user attempts to purchase something. We're not worried about
      * the user cancelling the purchase so we extend CancelIgnoringOuyaResponseListener, if
@@ -243,7 +248,8 @@ public class OUYA_IAP
                 return;
             }
 
-			mCallback.call("onPurchaseSuccess", new Object[] { mProduct.getIdentifier() } );
+			mLastPurchasedProductID = mProduct.getIdentifier();
+			mCallback.call("onPurchaseSuccess", new Object[] { } );
         }
 
         @Override

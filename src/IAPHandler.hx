@@ -22,6 +22,7 @@ class IAPHandler
 	public var requestReceiptsCall:Dynamic;
 	public var getReceiptProductIDsCall:Dynamic;
 	public var requestPurchaseCall:Dynamic;
+	public var getLastPurchasedProductIDCall:Dynamic;
 	public var ouyaFacadeObject:Dynamic;
 	
 	public function new( ouyaFacadeObject:Dynamic, DERKeyPath:String )
@@ -44,6 +45,8 @@ class IAPHandler
 			("com.jarnik.iaptest.OUYA_IAP", "getReceiptProductIDs", "()Ljava/lang/String;", true);
 		requestPurchaseCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestPurchase", "(Ljava/lang/String;)V", true);
+		getLastPurchasedProductIDCall = openfl.utils.JNI.createStaticMethod
+			("com.jarnik.iaptest.OUYA_IAP", "getLastPurchasedProductID", "()Ljava/lang/String;", true);
 		trace("=================== JNI methods linked!");
 		var appKey:ByteArray =  Assets.getBytes( DERKeyPath );
 		
@@ -73,14 +76,15 @@ class IAPHandler
 		requestReceiptsCall( [] );
 	}
 	
-	public function getProductListIDs():String {
-		// will return list of received product identifiers, delimited by space character
-		return getProductListIDsCall();
+	// I don't know how to send any values from JNI back to Haxe, therefore I use the getters
+	public function getLastPurchasedProductID():String {
+		return getLastPurchasedProductIDCall();
 	}
-	
-	public function getReceiptProductIDs():String {
-		// will return list of purchased products identifiers, delimited by space character
-		return getReceiptProductIDsCall();
+	public function getProductListIDs():Array<String> {
+		return getProductListIDsCall().split(" ");
+	}
+	public function getReceiptProductIDs():Array<String> {
+		return getReceiptProductIDsCall().split(" ");
 	}
 	
 	// ==================================== CALLBACKS - OVERRIDE THESE! ======================= 
@@ -88,7 +92,7 @@ class IAPHandler
 	// ==== Product List
 	public function onProductListReceived()
 	{
-		var p:Array<String> = getProductListIDs().split(" ");
+		var p:Array<String> = getProductListIDs();
 		trace("=== onProductListReceived! " + p.join(" "));
 		
 		requestReceipts();
@@ -99,9 +103,9 @@ class IAPHandler
 	}
 	
 	// ==== Purchasing
-	public function onPurchaseSuccess(productID:String)
+	public function onPurchaseSuccess()
 	{
-		trace("=== onPurchaseSuccess! "+productID);
+		trace("=== onPurchaseSuccess! "+getLastPurchasedProductID());
 	}
 	public function onPurchaseFailed(error:String)
 	{
@@ -115,7 +119,7 @@ class IAPHandler
 	// ==== Receipt List
 	public function onReceiptsReceived()
 	{
-		var p:Array<String> = getReceiptProductIDs().split(" ");
+		var p:Array<String> = getReceiptProductIDs();
 		trace("=== onReceiptsReceived! "+p.join("x"));
 	}
 	public function onReceiptsFailed( error:String )

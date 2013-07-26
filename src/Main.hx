@@ -24,6 +24,8 @@ class Main extends Sprite {
 	#end
 	
 	private var handler:MyIAPHandler;
+	private var testProductPurchased:Bool;
+	private var icon:Bitmap;
 	
 	public function new () {
 		
@@ -34,6 +36,10 @@ class Main extends Sprite {
 		
 		super ();
 		
+		testProductPurchased = false;
+		addChild( icon = new Bitmap( Assets.getBitmapData("assets/OUYA_O.png" ) ) );
+		icon.visible = false;
+		
 		#if android
 		var getContext = JNI.createStaticMethod ("org.haxe.nme.GameActivity", "getContext", "()Landroid/content/Context;", true);
 		OuyaController.init ( getContext () );
@@ -41,19 +47,35 @@ class Main extends Sprite {
 		ouyaFacade.init( getContext(), OUYA_DEVELOPER_ID );
 		trace("OUYA controller & facade inited!");
 		
-		handler = new MyIAPHandler( ouyaFacade.__jobject, DER_KEY_PATH );
-		handler.requestProductList(["test_sss_full", "__DECLINED__THIS_PURCHASE"]);
+		handler = new MyIAPHandler( ouyaFacade.__jobject, DER_KEY_PATH, receiptsReceived );
+		handler.requestProductList([ 
+			PRODUCT_IDENTIFIER
+			//, enter more product IDs here...
+		]); 
 		
-		addChild( new Bitmap( Assets.getBitmapData("assets/OUYA_O.png" ) ) );
 		stage.addEventListener (JoystickEvent.BUTTON_DOWN, stage_onJoystickButtonDown);
 		#end
 	}
 	
 	#if android
 	private function stage_onJoystickButtonDown( e:JoystickEvent ):Void {
+		if ( testProductPurchased )
+			return;
+		
 		trace("OUYA button pressed, starting purchase");
 		handler.requestPurchase( PRODUCT_IDENTIFIER );
 	}
 	#end
+	
+	private function receiptsReceived( products:Array<String> ):Void {
+		trace("===== Main - Receipts received");
+		icon.visible = true;
+		for ( p in products )
+			if ( p == PRODUCT_IDENTIFIER ) {
+				trace("===== Main - product purchased");
+				icon.visible = false;
+				testProductPurchased = true;
+			}
+	}
 	
 }

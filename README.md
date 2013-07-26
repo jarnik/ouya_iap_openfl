@@ -43,3 +43,4 @@ Contributing:
 =======
 
 My Java and JNI knowledge is fairly limited, so please don't hesitate to contribute with better methods.
+The openfl-ouya contains some part of ODK IAP API, but I couldn't get it to work, so I made this crude wrapper.

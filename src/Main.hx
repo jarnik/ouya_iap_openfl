@@ -15,7 +15,7 @@ import openfl.events.JoystickEvent;
 
 class Main extends Sprite {
 	
-	public static inline var OUYA_DEVELOPER_ID:String = "a589aa6a-cf50-4f72-9313-0a515e4dab95";
+	public static inline var OUYA_DEVELOPER_ID:String = "0000000-0000-00000-0000-0000";
 	public static inline var PRODUCT_IDENTIFIER:String = "test_sss_full";
 	public static inline var DER_KEY_PATH:String = "assets/key.der";
 	

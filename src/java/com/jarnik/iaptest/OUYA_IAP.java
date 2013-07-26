@@ -108,12 +108,7 @@ public class OUYA_IAP
                     Log.d("IAP", p.getName() + " costs " + p.getPriceInCents());
                 }
 				Log.d("IAP", "========== requestProductList SUCCESS "+products.size() );
-				//callback.call("onPurchase", new Object[] {"junk"});
-				String product_ids = "";
-				//for ( int i = 0; i < mProductList.size(); i++ )
-					//product_ids += mProductList.get( i ).getIdentifier()+" ";
-				product_ids = "kocka leze dirou";
-				mCallback.call("onProductListReceived", new Object[] { product_ids } );
+				mCallback.call("onProductListReceived", new Object[] {} );
             }
 
             @Override
@@ -129,6 +124,13 @@ public class OUYA_IAP
 		
 		Log.d("IAP", "========== requested product list " );
 		//callback.call("onPurchase", new Object[] {"junk"});
+	}
+	
+	public static String getProductListIDs() {
+		String product_ids = "";
+		for ( int i = 0; i < mProductList.size(); i++ )
+			product_ids += ( i > 0 ? " ": "" ) + mProductList.get( i ).getIdentifier();
+		return product_ids;
 	}
 	
 	// ======================================= PURCHASE =====================================================
@@ -400,6 +402,13 @@ public class OUYA_IAP
 			mCallback.call("onReceiptsCancelled", new Object[] {} );
         }
     }
+	
+	public static String getReceiptProductIDs() {
+		String product_ids = "";
+		for ( int i = 0; i < mReceiptList.size(); i++ )
+			product_ids += ( i > 0 ? " ": "" ) + mReceiptList.get( i ).getIdentifier();
+		return product_ids;
+	}
 	
 }
 

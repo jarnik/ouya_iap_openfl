@@ -62,8 +62,10 @@ class IAP_Handler
 	
 	public var initCall:Dynamic;
 	public var requestProductListCall:Dynamic;
-	public var requestPurchaseCall:Dynamic;
+	public var getProductListIDsCall:Dynamic;
 	public var requestReceiptsCall:Dynamic;
+	public var getReceiptProductIDsCall:Dynamic;
+	public var requestPurchaseCall:Dynamic;
 	public var ouyaFacadeObject:Dynamic;
 	
 	public function new( ouyaFacadeObject:Dynamic )
@@ -81,10 +83,14 @@ class IAP_Handler
 			//										   (Lorg/haxe/nme/HaxeObject;Ltv/ouya/console/api/OuyaFacade;[B)V
 		requestProductListCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestProductList", "([Ljava/lang/String;)V", true);
+		getProductListIDsCall = openfl.utils.JNI.createStaticMethod
+			("com.jarnik.iaptest.OUYA_IAP", "getProductListIDs", "()Ljava/lang/String;", true);
 		requestPurchaseCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestPurchase", "(Ljava/lang/String;)V", true);
 		requestReceiptsCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestReceipts", "()V", true);
+		getReceiptProductIDsCall = openfl.utils.JNI.createStaticMethod
+			("com.jarnik.iaptest.OUYA_IAP", "getReceiptProductIDs", "()Ljava/lang/String;", true);
 		trace("=================== JNI linked!");
 		var appKey:ByteArray =  Assets.getBytes("assets/key.der");
 		
@@ -116,11 +122,12 @@ class IAP_Handler
 	
 	// ==================================== CALLBACKS ======================= 
 
-	public function onProductListReceived(products:String)
+	public function onProductListReceived()
 	{
-		//trace("=== onProductListReceived! "+products.join(" "));
-		var p:Array<String> = products.split(" ");
-		trace("=== onProductListReceived! "+products+" >> "+p.join("x"));
+		var p:Array<String> = getProductListIDsCall().split(" ");
+		trace("=== onProductListReceived! >> " + p.join("x"));
+		
+		requestReceipts();
 	}
 	public function onProductListFailed(error:String)
 	{
@@ -140,9 +147,10 @@ class IAP_Handler
 		trace("=== onPurchaseCancelled! ");
 	}
 	
-	public function onReceiptsReceived(receipts:Array<String>)
+	public function onReceiptsReceived()
 	{
-		trace("=== onReceiptsReceived! "+receipts.join(" "));
+		var p:Array<String> = getReceiptProductIDsCall().split(" ");
+		trace("=== onReceiptsReceived! >> "+p.join("x"));
 	}
 	public function onReceiptsFailed( error:String )
 	{

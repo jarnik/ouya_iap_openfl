@@ -13,6 +13,7 @@ import org.json.JSONObject;
 
 import tv.ouya.console.api.Purchasable;
 import tv.ouya.console.api.Product;
+import tv.ouya.console.api.Receipt;
 import tv.ouya.console.api.OuyaFacade;
 import tv.ouya.console.api.CancelIgnoringOuyaResponseListener;
 import tv.ouya.console.api.OuyaResponseListener;
@@ -58,8 +59,10 @@ public class OUYA_IAP
     private static final Map<String, Product> mOutstandingPurchaseRequests = new HashMap<String, Product>();
 	
 	public static List<Purchasable> PRODUCT_IDENTIFIER_LIST;
-	public static HaxeObject mCallback;
 	private static List<Product> mProductList; 
+	private static List<Receipt> mReceiptList;
+	
+	public static HaxeObject mCallback;
 	private static OuyaFacade mOuyaFacade;
 	private static PublicKey mPublicKey;
 	
@@ -84,6 +87,8 @@ public class OUYA_IAP
             Log.e("IAP", "Unable to create encryption key", e);
         }
 	}
+	
+	// ======================================= PRODUCT LIST =====================================================
 	
 	public static void requestProductList(String[] products)
 	{
@@ -122,15 +127,20 @@ public class OUYA_IAP
 		//callback.call("onPurchase", new Object[] {"junk"});
 	}
 	
+	// ======================================= PURCHASE =====================================================
+		
 	public static void requestPurchase( String productName ) 
 		throws GeneralSecurityException, UnsupportedEncodingException, JSONException {
 		
 		Product product = null;
-		for ( Product p: mProductList )
-			if ( p.getIdentifier() == productName ) {
+		for ( Product p: mProductList ) {
+			Log.d("IAP", "testing "+p.getIdentifier()+" against "+productName);
+			if ( p.getIdentifier().equals( productName ) ) {
+				Log.d("IAP", "FOUND IT!");
 				product = p;
 				break;
 			}
+		}
 		if ( product == null ) {
 			Log.w("IAP", "Requested product ID "+productName+" not found in requested products!" );
             return;
@@ -268,6 +278,7 @@ public class OUYA_IAP
 
 			//TODO request recipes
             //requestReceipts();
+			mCallback.call("onPurchaseSuccess", new Object[] { mProduct.getIdentifier() } );
         }
 
         @Override
@@ -284,6 +295,102 @@ public class OUYA_IAP
 			Log.w("IAP", "HEYYA PurchaseListener.onCancel");
 			mCallback.call("onPurchaseCancelled", new Object[] {} );
             //showError("User cancelled purchase");
+        }
+    }
+	
+	// ======================================= RECEIPTS =====================================================
+	
+	public static void requestReceipts() {
+        mOuyaFacade.requestReceipts(new ReceiptListener());
+    }
+	
+    /**
+     * Display an error to the user. We're using a toast for simplicity.
+     */
+
+    private static void showError(final String errorMessage) {
+		Log.w("IAP", "requestReceipts error "+errorMessage);
+		mCallback.call("onReceiptsFailed", new Object[] { errorMessage } );
+        //Toast.makeText(IapSampleActivity.this, errorMessage, Toast.LENGTH_LONG).show();
+    }
+
+    /**
+     * The callback for when the list of user receipts has been requested.
+     */
+    public static class ReceiptListener implements OuyaResponseListener<String>
+    {
+        /**
+         * Handle the successful fetching of the data for the receipts from the server.
+         *
+         * @param receiptResponse The response from the server.
+         */
+        @Override
+        public void onSuccess(String receiptResponse) {
+            OuyaEncryptionHelper helper = new OuyaEncryptionHelper();
+            List<Receipt> receipts;
+            try {
+                JSONObject response = new JSONObject(receiptResponse);
+                if(response.has("key") && response.has("iv")) {
+                    receipts = helper.decryptReceiptResponse(response, mPublicKey);
+                } else {
+                    receipts = helper.parseJSONReceiptResponse(receiptResponse);
+                }
+            } catch (ParseException e) {
+                throw new RuntimeException(e);
+            } catch (JSONException e) {
+                if(e.getMessage().contains("ENCRYPTED")) {
+                    // This is a hack for some testing code which will be removed
+                    // before the consumer release
+                    try {
+                        receipts = helper.parseJSONReceiptResponse(receiptResponse);
+                    } catch (IOException ioe) {
+                        throw new RuntimeException(ioe);
+                    }
+                } else {
+                    throw new RuntimeException(e);
+                }
+            } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+            Collections.sort(receipts, new Comparator<Receipt>() {
+                @Override
+                public int compare(Receipt lhs, Receipt rhs) {
+                    return rhs.getPurchaseDate().compareTo(lhs.getPurchaseDate());
+                }
+            });
+
+            mReceiptList = receipts;
+			mCallback.call("onReceiptsReceived", new Object[] { receipts } );
+        }
+
+        /**
+         * Handle a failure. Because displaying the receipts is not critical to the application we just show an error
+         * message rather than asking the user to authenticate themselves just to start the application up.
+         *
+         * @param errorCode An HTTP error code between 0 and 999, if there was one. Otherwise, an internal error code from the
+         *                  Ouya server, documented in the {@link OuyaErrorCodes} class.
+         *
+         * @param errorMessage Empty for HTTP error codes. Otherwise, a brief, non-localized, explanation of the error.
+         *
+         * @param optionalData A Map of optional key/value pairs which provide additional information.
+         */
+
+        @Override
+        public void onFailure(int errorCode, String errorMessage, Bundle optionalData) {
+            Log.w("IAP", "Request Receipts error (code " + errorCode + ": " + errorMessage + ")");
+            showError("Could not fetch receipts (error " + errorCode + ": " + errorMessage + ")");
+        }
+
+        /*
+         * Handle user canceling
+         */
+        @Override
+        public void onCancel()
+        {
+            //showError("User cancelled getting receipts");
+			mCallback.call("onReceiptsCancelled", new Object[] {} );
         }
     }
 	

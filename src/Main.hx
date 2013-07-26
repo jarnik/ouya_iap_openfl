@@ -20,7 +20,7 @@ class Main extends Sprite {
 	public static var ouyaFacade:OuyaFacade;
 	#end
 	
-	private var p:Purchases;
+	private var p:IAP_Handler;
 	
 	public function new () {
 		
@@ -38,7 +38,7 @@ class Main extends Sprite {
 		
 		// How do you call Haxe from Java (Android) http://www.openfl.org/forums/general-discussion/how-do-you-call-haxe-java-android/
 		
-		p = new Purchases( ouyaFacade.__jobject );
+		p = new IAP_Handler( ouyaFacade.__jobject );
 		
 		p.requestProductList(["test_sss_full", "__DECLINED__THIS_PURCHASE"]);
 		
@@ -57,12 +57,13 @@ class Main extends Sprite {
 	
 }
 
-class Purchases
+class IAP_Handler
 {	
 	
 	public var initCall:Dynamic;
 	public var requestProductListCall:Dynamic;
 	public var requestPurchaseCall:Dynamic;
+	public var requestReceiptsCall:Dynamic;
 	public var ouyaFacadeObject:Dynamic;
 	
 	public function new( ouyaFacadeObject:Dynamic )
@@ -82,6 +83,8 @@ class Purchases
 			("com.jarnik.iaptest.OUYA_IAP", "requestProductList", "([Ljava/lang/String;)V", true);
 		requestPurchaseCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestPurchase", "(Ljava/lang/String;)V", true);
+		requestReceiptsCall = openfl.utils.JNI.createStaticMethod
+			("com.jarnik.iaptest.OUYA_IAP", "requestReceipts", "()V", true);
 		trace("=================== JNI linked!");
 		var appKey:ByteArray =  Assets.getBytes("assets/key.der");
 		
@@ -106,11 +109,17 @@ class Purchases
 		requestPurchaseCall( [product] );
 	}
 	
+	public function requestReceipts():Void {
+		trace("requestReceipts");
+		requestReceiptsCall( [] );
+	}
+	
 	// ==================================== CALLBACKS ======================= 
 
 	public function onProductListReceived(products:Dynamic)
 	{
 		trace("=== onProductListReceived! "+products);
+		trace("=== onProductListReceived! ln "+products.length);
 	}
 	public function onProductListFailed(error:String)
 	{
@@ -119,7 +128,7 @@ class Purchases
 	
 	public function onPurchaseSuccess(productID:String)
 	{
-		trace("=== callback! "+productID);
+		trace("=== onPurchaseSuccess! "+productID);
 	}
 	public function onPurchaseFailed(error:String)
 	{
@@ -128,6 +137,19 @@ class Purchases
 	public function onPurchaseCancelled()
 	{
 		trace("=== onPurchaseCancelled! ");
+	}
+	
+	public function onReceiptsReceived(receipts:Dynamic)
+	{
+		trace("=== onReceiptsReceived! "+receipts);
+	}
+	public function onReceiptsFailed( error:String )
+	{
+		trace("=== onReceiptsFailed "+error);
+	}
+	public function onReceiptsCancelled()
+	{
+		trace("=== onReceiptsCancelled ");
 	}
 }
 

@@ -1,0 +1,8 @@
+
+class MyIAPHandler extends IAPHandler 
+{
+	
+	
+}
+
+

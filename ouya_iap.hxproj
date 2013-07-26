@@ -16,19 +16,23 @@
   </output>
   <!-- Other classes to be compiled into your SWF -->
   <classpaths>
-    <class path="Source" />
+    <class path="src" />
+    <class path="C:\HaxeToolkit\haxe/lib\openfl/1,0,4/" />
+    <class path="C:\HaxeToolkit\haxe/lib\openfl-ouya/1,0,2/" />
+    <class path="bin/android/haxe" />
   </classpaths>
   <!-- Build options -->
   <build>
-    <option directives="" />
+    <option directives="tools=1&#xA;openfl_ver=1.0.4&#xA;openfl&#xA;display&#xA;android&#xA;mobile&#xA;android" />
     <option flashStrict="False" />
-    <option mainClass="com.example.ouya_iap" />
+    <option mainClass="ApplicationMain" />
     <option enabledebug="False" />
-    <option additional="" />
+    <option additional="--no-output&#xA;--macro allowPackage(&quot;flash&quot;)" />
   </build>
   <!-- haxelib libraries -->
   <haxelib>
     <library name="openfl" />
+    <library name="openfl-ouya" />
   </haxelib>
   <!-- Class files to compile (other referenced classes will automatically be included) -->
   <compileTargets>

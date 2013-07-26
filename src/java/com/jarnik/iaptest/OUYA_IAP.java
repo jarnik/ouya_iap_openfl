@@ -36,26 +36,8 @@ import java.util.*;
 
 public class OUYA_IAP
 {
-	/*
-	public static void requestProduct(final HaxeObject callback)
-	{
-		GameActivity.getInstance().runOnUiThread
-		(
-			new Runnable()
-			{ 
-				public void run() 
-				{
-					callback.call("onPurchase", new Object[] {"junk"});
-				}
-			}
-		);
-		//callback.call("onPurchase", new Object[] {"junk"});
-	}*/
+	// This is mostly a copy-paste of ODK's iap-sample-app --Jaroslav Meloun
 	
-	/**
-     * The outstanding purchase request UUIDs.
-     */
-
     private static final Map<String, Product> mOutstandingPurchaseRequests = new HashMap<String, Product>();
 	
 	public static List<Purchasable> PRODUCT_IDENTIFIER_LIST;
@@ -71,13 +53,7 @@ public class OUYA_IAP
 		mOuyaFacade = ouyaFacade;
 		mCallback = callback;
 		
-		Log.d("IAP", "Java here, running init!");
-		
-		Log.d("IAP", "got APPLICATION_KEY_64 "+APPLICATION_KEY_64);
-		
 		byte[] APPLICATION_KEY = Base64.decode( APPLICATION_KEY_64, Base64.NO_WRAP );
-		Log.d("IAP", "received APP KEY bytes "+APPLICATION_KEY[0]+" "+APPLICATION_KEY[1]);
-		
         // Create a PublicKey object from the key data downloaded from the developer portal.
         try {
             X509EncodedKeySpec keySpec = new X509EncodedKeySpec(APPLICATION_KEY);
@@ -92,13 +68,9 @@ public class OUYA_IAP
 	
 	public static void requestProductList(String[] products)
 	{
-		Log.d("IAP", " will request "+products[0]+" etc " );
-		
 		PRODUCT_IDENTIFIER_LIST = new ArrayList<Purchasable>();
 		for ( String s : products )
 			PRODUCT_IDENTIFIER_LIST.add( new Purchasable( s ) );
-		
-		Log.d("IAP", "========== created product list of "+PRODUCT_IDENTIFIER_LIST.size() );
 		
 		mOuyaFacade.requestProductList(PRODUCT_IDENTIFIER_LIST, new CancelIgnoringOuyaResponseListener<ArrayList<Product>>() {
             @Override
@@ -107,7 +79,7 @@ public class OUYA_IAP
 				for(Product p : products) {
                     Log.d("IAP", p.getName() + " costs " + p.getPriceInCents());
                 }
-				Log.d("IAP", "========== requestProductList SUCCESS "+products.size() );
+				Log.d("IAP", "Received "+products.size()+" products." );
 				mCallback.call("onProductListReceived", new Object[] {} );
             }
 
@@ -117,16 +89,13 @@ public class OUYA_IAP
                 // here to tell you that your app needs to handle this case: if your app doesn't display
                 // something, the user won't know of the failure.
                 //Toast.makeText(IapSampleActivity.this, "Could not fetch product information (error " + errorCode + ": " + errorMessage + ")", Toast.LENGTH_LONG).show();
-				Log.d("IAP", "========== requestProductList FAIL " );
 				mCallback.call("onProductListFailed",  new Object[] { errorCode + ": " + errorMessage } );
             }
         }); 
-		
-		Log.d("IAP", "========== requested product list " );
-		//callback.call("onPurchase", new Object[] {"junk"});
 	}
 	
 	public static String getProductListIDs() {
+		// will return list of received product identifiers, delimited by space character
 		String product_ids = "";
 		for ( int i = 0; i < mProductList.size(); i++ )
 			product_ids += ( i > 0 ? " ": "" ) + mProductList.get( i ).getIdentifier();
@@ -139,20 +108,15 @@ public class OUYA_IAP
 		throws GeneralSecurityException, UnsupportedEncodingException, JSONException {
 		
 		Product product = null;
-		for ( Product p: mProductList ) {
-			Log.d("IAP", "testing "+p.getIdentifier()+" against "+productName);
+		for ( Product p: mProductList )
 			if ( p.getIdentifier().equals( productName ) ) {
-				Log.d("IAP", "FOUND IT!");
 				product = p;
 				break;
 			}
-		}
 		if ( product == null ) {
-			Log.w("IAP", "Requested product ID "+productName+" not found in requested products!" );
+			Log.w("IAP", "Requested product ID "+productName+" not found in products!" );
             return;
 		}
-		
-		Log.d("IAP", "========== requesting purchase of "+product.getName() );
 			
         SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
 
@@ -166,7 +130,6 @@ public class OUYA_IAP
         purchaseRequest.put("uuid", uniqueId);
         purchaseRequest.put("identifier", product.getIdentifier());
         String purchaseRequestJson = purchaseRequest.toString();
-		Log.w("IAP", "HEYYA requesting "+product.getIdentifier()+" uuid "+uniqueId);
 
         byte[] keyBytes = new byte[16];
         sr.nextBytes(keyBytes);
@@ -194,7 +157,6 @@ public class OUYA_IAP
         synchronized (mOutstandingPurchaseRequests) {
             mOutstandingPurchaseRequests.put(uniqueId, product);
         }
-		Log.w("IAP", "HEYYA ouyaFacade.requestPurchase");
         mOuyaFacade.requestPurchase(purchasable, new PurchaseListener(product));
 	}
 	
@@ -232,7 +194,6 @@ public class OUYA_IAP
         public void onSuccess(String result) {
             Product product;
             String id;
-			Log.w("IAP", "HEYYA PurchaseListener.onSuccess");
             try {
                 OuyaEncryptionHelper helper = new OuyaEncryptionHelper();
 
@@ -282,14 +243,11 @@ public class OUYA_IAP
                 return;
             }
 
-			//TODO request recipes
-            //requestReceipts();
 			mCallback.call("onPurchaseSuccess", new Object[] { mProduct.getIdentifier() } );
         }
 
         @Override
         public void onFailure(int errorCode, String errorMessage, Bundle optionalData) {
-			Log.w("IAP", "onPurchaseFailed "+errorCode+": "+errorMessage);
 			mCallback.call("onPurchaseFailed", new Object[] { errorCode+": "+errorMessage } );
         }
 
@@ -298,9 +256,7 @@ public class OUYA_IAP
          */
         @Override
         public void onCancel() {
-			Log.w("IAP", "HEYYA PurchaseListener.onCancel");
 			mCallback.call("onPurchaseCancelled", new Object[] {} );
-            //showError("User cancelled purchase");
         }
     }
 	
@@ -309,15 +265,9 @@ public class OUYA_IAP
 	public static void requestReceipts() {
         mOuyaFacade.requestReceipts(new ReceiptListener());
     }
-	
-    /**
-     * Display an error to the user. We're using a toast for simplicity.
-     */
 
     private static void showError(final String errorMessage) {
-		Log.w("IAP", "requestReceipts error "+errorMessage);
 		mCallback.call("onReceiptsFailed", new Object[] { errorMessage } );
-        //Toast.makeText(IapSampleActivity.this, errorMessage, Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -388,7 +338,6 @@ public class OUYA_IAP
 
         @Override
         public void onFailure(int errorCode, String errorMessage, Bundle optionalData) {
-            Log.w("IAP", "Request Receipts error (code " + errorCode + ": " + errorMessage + ")");
             showError("Could not fetch receipts (error " + errorCode + ": " + errorMessage + ")");
         }
 
@@ -398,12 +347,12 @@ public class OUYA_IAP
         @Override
         public void onCancel()
         {
-            //showError("User cancelled getting receipts");
 			mCallback.call("onReceiptsCancelled", new Object[] {} );
         }
     }
 	
 	public static String getReceiptProductIDs() {
+		// will return list of purchased products identifiers, delimited by space character
 		String product_ids = "";
 		for ( int i = 0; i < mReceiptList.size(); i++ )
 			product_ids += ( i > 0 ? " ": "" ) + mReceiptList.get( i ).getIdentifier();

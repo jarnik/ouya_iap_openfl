@@ -32,6 +32,11 @@ You will need:
  
 Enter the above mentioned into the Main.hx.
 
+The latest version of openfl/openfl-native is missing the "createInterface" method - 
+I guess jgranick had it in his working copy but did not push to the repo.
+As a temporary solution, you will have to comment out every reference to "createInterface" within
+"C:\HaxeToolkit\haxe\lib\openfl-ouya/1,0,2/tv/ouya/console/api/OuyaResponseListener.hx" or any other class using it.
+
 IAPHandler.hx class defines multiple callback methods (onProductListReceived, onPurchaseSuccess, etc.).
 Subclass it and override the methods with your own handlers.
 One such example subclass is a MyIAPHandler.hx.

@@ -1,6 +1,6 @@
 package com.jarnik.iaptest;
 
-import org.haxe.nme.HaxeObject;
+import org.haxe.lime.HaxeObject;
 import java.util.Arrays;
 import android.util.Log;
 import java.util.List;

@@ -3,7 +3,7 @@ import flash.display.Sprite;
 import flash.utils.ByteArray;
 import haxe.io.Bytes;
 import haxe.crypto.BaseCode;
-
+import flash.Lib;
 import openfl.Assets;
 
 #if android
@@ -41,7 +41,7 @@ class Main extends Sprite {
 		icon.visible = false;
 		
 		#if android
-		var getContext = JNI.createStaticMethod ("org.haxe.nme.GameActivity", "getContext", "()Landroid/content/Context;", true);
+		var getContext = JNI.createStaticMethod ("org.haxe.lime.GameActivity", "getContext", "()Landroid/content/Context;", true);
 		OuyaController.init ( getContext () );
 		ouyaFacade = OuyaFacade.getInstance();
 		ouyaFacade.init( getContext(), OUYA_DEVELOPER_ID );
@@ -53,7 +53,7 @@ class Main extends Sprite {
 			//, enter more product IDs here...
 		]); 
 		
-		stage.addEventListener (JoystickEvent.BUTTON_DOWN, stage_onJoystickButtonDown);
+		Lib.current.stage.addEventListener (JoystickEvent.BUTTON_DOWN, stage_onJoystickButtonDown); // 'stage' is still null here, so we use Lib.current.stage
 		#end
 	}
 	

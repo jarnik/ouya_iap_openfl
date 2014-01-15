@@ -34,7 +34,7 @@ class IAPHandler
 		// bind methods to JNI
 		trace("=================== JNI linking methods...");
 		initCall = openfl.utils.JNI.createStaticMethod
-			("com.jarnik.iaptest.OUYA_IAP", "init", "(Lorg/haxe/nme/HaxeObject;Ltv/ouya/console/api/OuyaFacade;Ljava/lang/String;)V", true);
+			("com.jarnik.iaptest.OUYA_IAP", "init", "(Lorg/haxe/lime/HaxeObject;Ltv/ouya/console/api/OuyaFacade;Ljava/lang/String;)V", true);
 		requestProductListCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestProductList", "([Ljava/lang/String;)V", true);
 		getProductListIDsCall = openfl.utils.JNI.createStaticMethod

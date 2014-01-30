@@ -20,6 +20,7 @@ class IAPHandler
 	public var requestProductListCall:Dynamic;
 	public var getProductListIDsCall:Dynamic;
 	public var requestReceiptsCall:Dynamic;
+	public var requestGamerInfoCall:Dynamic;
 	public var getReceiptProductIDsCall:Dynamic;
 	public var requestPurchaseCall:Dynamic;
 	public var getLastPurchasedProductIDCall:Dynamic;
@@ -35,6 +36,8 @@ class IAPHandler
 		trace("=================== JNI linking methods...");
 		initCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "init", "(Lorg/haxe/lime/HaxeObject;Ltv/ouya/console/api/OuyaFacade;Ljava/lang/String;)V", true);
+		requestGamerInfoCall = openfl.utils.JNI.createStaticMethod
+			("com.jarnik.iaptest.OUYA_IAP", "requestGamerInfo", "()V", true);
 		requestProductListCall = openfl.utils.JNI.createStaticMethod
 			("com.jarnik.iaptest.OUYA_IAP", "requestProductList", "([Ljava/lang/String;)V", true);
 		getProductListIDsCall = openfl.utils.JNI.createStaticMethod
@@ -88,6 +91,22 @@ class IAPHandler
 	}
 	
 	// ==================================== CALLBACKS - OVERRIDE THESE! ======================= 
+
+	// === get username
+	public function onGamerInfoReceived(username:String)
+	{
+		trace("=== onGamerInfoReceived! " + username);
+	}
+	
+	public function onGamerInfoFailed(error:String)
+	{
+		trace("=== onGamerInfoFailed! " + error);
+	}
+	
+	public function onGamerInfoCanceled()
+	{
+		trace("=== onGamerInfoCanceled! " );
+	}
 
 	// ==== Product List
 	public function onProductListReceived()

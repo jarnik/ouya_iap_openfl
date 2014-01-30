@@ -64,7 +64,31 @@ public class OUYA_IAP
             Log.e("IAP", "Unable to create encryption key", e);
         }
 	}
+	// ======================================== GAMER INFO ======================================
+	public static void requestGamerInfo()
+	{
+		mOuyaFacade.requestGamerInfo(new GamerInfoLister());
+	}
 	
+	public static class GamerInfoLister implements OuyaResponseListener<GamerInfo>
+    {
+        @Override
+        public void onSuccess(GamerInfo gamerInfoResponse) {
+			mCallback.call("onGamerInfoReceived", new Object[] { gamerInfoResponse.getUsername() } );
+        }
+		
+		@Override
+        public void onFailure(int errorCode, String errorMessage, Bundle optionalData) {
+			mCallback.call("onGamerInfoFailed", new Object[] { errorCode+": "+errorMessage } );
+        }
+
+        @Override
+        public void onCancel() {
+			mCallback.call("onGamerInfoCanceled", new Object[] {} );
+        }
+    }	
+	    
+	    
 	// ======================================= PRODUCT LIST =====================================================
 	
 	public static void requestProductList(String[] products)

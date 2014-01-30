@@ -19,6 +19,7 @@ import tv.ouya.console.api.CancelIgnoringOuyaResponseListener;
 import tv.ouya.console.api.OuyaResponseListener;
 import tv.ouya.console.api.OuyaErrorCodes;
 import tv.ouya.console.api.OuyaEncryptionHelper;
+import tv.ouya.console.api.GamerInfo;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
